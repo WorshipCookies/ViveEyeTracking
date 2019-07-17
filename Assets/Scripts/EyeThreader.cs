@@ -9,6 +9,7 @@ using ViveSR.anipal.Eye;
 using System.Collections.Concurrent;
 using static BlinkTracker;
 using static EyeTracker;
+using LSL;
 
 public class EyeThreader : MonoBehaviour
 {
@@ -32,6 +33,21 @@ public class EyeThreader : MonoBehaviour
     public const int m_GAZE_FRAME_WINDOW = 5;
 
     [HideInInspector] public volatile int frameCounter;
+
+    // LabStreamingLayer Integration
+
+    private const string unique_source_id = "A8794C21-8607-49B1-9754-44F9FA144F63";
+
+    public string lslStreamName = "Unity_EyeGazeAndPupil_120Hz";
+    public string lslStreamType = "Eye_Gaze_Data";
+
+    private liblsl.StreamInfo lslStreamInfo;
+    private liblsl.StreamOutlet lslOutlet;
+    private const int lslChannelCount = 7;
+
+    private double nominal_srate = 120;
+    private const liblsl.channel_format_t lslChannelFormat = liblsl.channel_format_t.cf_float32;
+
 
     void Start()
     {
@@ -109,6 +125,10 @@ public class EyeThreader : MonoBehaviour
         List<Ray> gazeDataWindow = new List<Ray>();
 
 
+        lslOutlet = KickStartLSLStream(); // Start the LSL Streamer
+        float[ , ] gazeSampler = new float[100, lslChannelCount];
+        int sampleCounter = 0;
+
         while (true)
         {
             ViveSR.Error error = SRanipal_Eye.GetEyeData(ref data);
@@ -119,7 +139,29 @@ public class EyeThreader : MonoBehaviour
                 float open_left = data.verbose_data.left.eye_openness;
                 float open_right = data.verbose_data.right.eye_openness;
                 TreatBlinkData(open_left, open_right, ref leftBlinkTracker, ref rightBlinkTracker, ref startTimeStamp_Left, ref startTimeStamp_Right, ref MAXCOUNTER_REACHED_LEFT, ref MAXCOUNTER_REACHED_RIGHT);
-                GazeDataRay(data, ref gazeDataWindow);
+
+                // Gaze Data Handling with LabStreaming Layer
+                Vector3 gazeDirection = GazeDataRay(data, ref gazeDataWindow);
+                gazeSampler[sampleCounter, 0] = gazeDirection.x;
+                gazeSampler[sampleCounter, 1] = gazeDirection.y;
+                gazeSampler[sampleCounter, 2] = gazeDirection.z;
+
+                // Pupil Data Handling with LabStreaming Layer
+                float[] pupilDirection = PupilData(data);
+                gazeSampler[sampleCounter, 3] = pupilDirection[0];
+                gazeSampler[sampleCounter, 4] = pupilDirection[1];
+                gazeSampler[sampleCounter, 5] = pupilDirection[2];
+                gazeSampler[sampleCounter, 6] = pupilDirection[3];
+
+                sampleCounter++;
+                if(sampleCounter >= 100)
+                {
+                    // Send the Chunk!
+                    lslOutlet.push_chunk(gazeSampler);
+                    gazeSampler = new float[100, lslChannelCount];
+                    sampleCounter = 0;
+                }
+
             }
 
             Thread.Sleep(FrequencyControl);
@@ -262,17 +304,20 @@ public class EyeThreader : MonoBehaviour
         }
     }
 
-    void GazeDataRay(EyeData eyeData, ref List<Ray> gazeDataWindow)
+    Vector3 GazeDataRay(EyeData eyeData, ref List<Ray> gazeDataWindow)
     {
         bool valid = eyeData.verbose_data.combined.eye_data.GetValidity(SingleEyeDataValidity.SINGLE_EYE_DATA_GAZE_DIRECTION_VALIDITY);
+        Vector3 direction = Vector3.zero;
+
         if (valid)
         {
             // Do Stuff
             Vector3 origin = eyeData.verbose_data.combined.eye_data.gaze_origin_mm * 0.001f;
-            Vector3 direction = eyeData.verbose_data.combined.eye_data.gaze_direction_normalized;
+            direction = eyeData.verbose_data.combined.eye_data.gaze_direction_normalized;
             direction.x *= -1; // This needs to be reversed
             gazeDataWindow.Add(new Ray(origin, direction));
         }
+
         if (gazeDataWindow.Count >= m_GAZE_FRAME_WINDOW)
         {
             Vector3 sum_origin = Vector3.zero;
@@ -289,6 +334,9 @@ public class EyeThreader : MonoBehaviour
 
             gazeDataWindow.Clear(); // Reset
         }
+
+        return direction;
+
     }
 
     void TreatGazeData(Ray ray)
@@ -299,6 +347,33 @@ public class EyeThreader : MonoBehaviour
             timestamp = frameCounter
         };
         gaze_data.Enqueue(eye_info);
+    }
+
+    float[] PupilData(EyeData eyeData)
+    {
+        bool valid_left = eyeData.verbose_data.left.GetValidity(SingleEyeDataValidity.SINGLE_EYE_DATA_PUPIL_POSITION_IN_SENSOR_AREA_VALIDITY);
+
+        float XLeft = 0.0f;
+        float YLeft = 0.0f;
+        if (valid_left)
+        {
+            // To Make Sense in the Unity Coordinate System.
+            XLeft = eyeData.verbose_data.left.pupil_position_in_sensor_area.x * 2 - 1;
+            YLeft = eyeData.verbose_data.left.pupil_position_in_sensor_area.y * -2 + 1;
+        }
+
+        bool valid_right = eyeData.verbose_data.right.GetValidity(SingleEyeDataValidity.SINGLE_EYE_DATA_PUPIL_POSITION_IN_SENSOR_AREA_VALIDITY);
+        float XRight = 0.0f;
+        float YRight = 0.0f;
+        if (valid_right)
+        {
+            // To Make Sense in the Unity Coordinate System.
+            XRight = eyeData.verbose_data.right.pupil_position_in_sensor_area.x * 2 - 1;
+            YRight = eyeData.verbose_data.right.pupil_position_in_sensor_area.y * -2 + 1;
+        }
+
+        return new float[] { XLeft, YLeft, XRight, YRight };
+
     }
 
     // Add Blink Type to Queue Function
@@ -313,6 +388,20 @@ public class EyeThreader : MonoBehaviour
         };
 
         blink_data.Enqueue(bd);
+    }
+
+    // This needs to be called to kickstart the LSL Stream Method.
+    liblsl.StreamOutlet KickStartLSLStream()
+    {
+        lslStreamInfo = new liblsl.StreamInfo(
+            lslStreamName,
+            lslStreamType,
+            lslChannelCount,
+            nominal_srate,
+            lslChannelFormat,
+            unique_source_id);
+
+        return new liblsl.StreamOutlet(lslStreamInfo);
     }
 
 }
