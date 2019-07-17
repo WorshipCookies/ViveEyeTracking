@@ -34,8 +34,7 @@ public class EyeThreader : MonoBehaviour
 
     [HideInInspector] public volatile int frameCounter;
 
-    // LabStreamingLayer Integration
-
+    // LabStreamingLayer Integration -- Gaze and Pupil Streamer
     private const string unique_source_id = "A8794C21-8607-49B1-9754-44F9FA144F63";
 
     public string lslStreamName = "Unity_EyeGazeAndPupil_120Hz";
@@ -48,6 +47,19 @@ public class EyeThreader : MonoBehaviour
     private double nominal_srate = 120;
     private const liblsl.channel_format_t lslChannelFormat = liblsl.channel_format_t.cf_float32;
 
+
+    // LabStreaming Layer Integration -- Eye Openess Streamer
+    private const string unique_source_id_blink = "4AA9B0CA-C744-4B0A-B2F3-8C15DC0E9F3D";
+
+    public string lslStreamName_Blink = "Unity_EyeOpenessMarker";
+    public string lslStreamType_Blink = "Eye_Openess_Markers";
+
+    private liblsl.StreamInfo lslStreamInfo_Blink;
+    private liblsl.StreamOutlet lslOutlet_Blink;
+    private const int lslChannelCount_Blink = 1;
+
+    private double nominal_srate_blink = liblsl.IRREGULAR_RATE;
+    private const liblsl.channel_format_t lslChannelFormat_Blink = liblsl.channel_format_t.cf_string;
 
     void Start()
     {
@@ -129,41 +141,52 @@ public class EyeThreader : MonoBehaviour
         float[ , ] gazeSampler = new float[100, lslChannelCount];
         int sampleCounter = 0;
 
+        lslOutlet_Blink = KickStartBlinkLSLStream(); // Start the LSL Blink Streamer
+
+        int PrevFrameSequence = 0;
+        int CurrFrameSequence = 0;
+
         while (true)
         {
             ViveSR.Error error = SRanipal_Eye.GetEyeData(ref data);
-
-            if(error == ViveSR.Error.WORK)
+            
+            if (error == ViveSR.Error.WORK)
             {
-                // Eye Blinking Data Treatment.
-                float open_left = data.verbose_data.left.eye_openness;
-                float open_right = data.verbose_data.right.eye_openness;
-                TreatBlinkData(open_left, open_right, ref leftBlinkTracker, ref rightBlinkTracker, ref startTimeStamp_Left, ref startTimeStamp_Right, ref MAXCOUNTER_REACHED_LEFT, ref MAXCOUNTER_REACHED_RIGHT);
+                CurrFrameSequence = data.frame_sequence;
 
-                // Gaze Data Handling with LabStreaming Layer
-                Vector3 gazeDirection = GazeDataRay(data, ref gazeDataWindow);
-                gazeSampler[sampleCounter, 0] = gazeDirection.x;
-                gazeSampler[sampleCounter, 1] = gazeDirection.y;
-                gazeSampler[sampleCounter, 2] = gazeDirection.z;
-
-                // Pupil Data Handling with LabStreaming Layer
-                float[] pupilDirection = PupilData(data);
-                gazeSampler[sampleCounter, 3] = pupilDirection[0];
-                gazeSampler[sampleCounter, 4] = pupilDirection[1];
-                gazeSampler[sampleCounter, 5] = pupilDirection[2];
-                gazeSampler[sampleCounter, 6] = pupilDirection[3];
-
-                sampleCounter++;
-                if(sampleCounter >= 100)
+                // Make sure we are not repeating the same data points! -- Current rate is 120Hz for the Eye Tracking System
+                if(CurrFrameSequence != PrevFrameSequence)
                 {
-                    // Send the Chunk!
-                    lslOutlet.push_chunk(gazeSampler);
-                    gazeSampler = new float[100, lslChannelCount];
-                    sampleCounter = 0;
+                    // Eye Blinking Data Treatment.
+                    float open_left = data.verbose_data.left.eye_openness;
+                    float open_right = data.verbose_data.right.eye_openness;
+                    TreatBlinkData(open_left, open_right, ref leftBlinkTracker, ref rightBlinkTracker, ref startTimeStamp_Left, ref startTimeStamp_Right, ref MAXCOUNTER_REACHED_LEFT, ref MAXCOUNTER_REACHED_RIGHT, lslOutlet_Blink);
+
+                    // Gaze Data Handling with LabStreaming Layer
+                    Vector3 gazeDirection = GazeDataRay(data, ref gazeDataWindow);
+                    gazeSampler[sampleCounter, 0] = gazeDirection.x;
+                    gazeSampler[sampleCounter, 1] = gazeDirection.y;
+                    gazeSampler[sampleCounter, 2] = gazeDirection.z;
+
+                    // Pupil Data Handling with LabStreaming Layer
+                    float[] pupilDirection = PupilData(data);
+                    gazeSampler[sampleCounter, 3] = pupilDirection[0];
+                    gazeSampler[sampleCounter, 4] = pupilDirection[1];
+                    gazeSampler[sampleCounter, 5] = pupilDirection[2];
+                    gazeSampler[sampleCounter, 6] = pupilDirection[3];
+
+                    sampleCounter++;
+                    if (sampleCounter >= 100)
+                    {
+                        // Send the Chunk!
+                        lslOutlet.push_chunk(gazeSampler);
+                        gazeSampler = new float[100, lslChannelCount];
+                        sampleCounter = 0;
+                    }
+
+                    PrevFrameSequence = CurrFrameSequence;
                 }
-
             }
-
             Thread.Sleep(FrequencyControl);
         }
     }
@@ -184,7 +207,9 @@ public class EyeThreader : MonoBehaviour
     /// <param name="startTimeStamp_Right"></param>
     /// <param name="MAXCOUNTER_REACHED_LEFT"></param>
     /// <param name="MAXCOUNTER_REACHED_RIGHT"></param>
-    void TreatBlinkData(float open_left, float open_right, ref List<float> leftBlinkTracker, ref List<float> rightBlinkTracker, ref int startTimeStamp_Left, ref int startTimeStamp_Right, ref bool MAXCOUNTER_REACHED_LEFT, ref bool MAXCOUNTER_REACHED_RIGHT)
+    void TreatBlinkData(float open_left, float open_right, ref List<float> leftBlinkTracker, 
+        ref List<float> rightBlinkTracker, ref int startTimeStamp_Left, ref int startTimeStamp_Right, 
+        ref bool MAXCOUNTER_REACHED_LEFT, ref bool MAXCOUNTER_REACHED_RIGHT, liblsl.StreamOutlet lslBlinkOutlet)
     {
         // Treating the Left Eye 
         if ((open_left > THRESHOLD_CLOSE_EYE_VALUE && leftBlinkTracker.Count > 0) || leftBlinkTracker.Count > MAX_FRAME_COUNT)
@@ -208,6 +233,7 @@ public class EyeThreader : MonoBehaviour
                         // We need to take this into account
                         AddDataToQueue(startTimeStamp_Left, EyeID.LEFT, BlinkType.EXTENDED_BLINK);
                         MAXCOUNTER_REACHED_LEFT = false;
+                        lslBlinkOutlet.push_sample(new string[] { "OPEN_LEFT_EXTENDED" });
                     }
                     // Ignore this and start over
                     leftBlinkTracker = new List<float>();
@@ -217,18 +243,21 @@ public class EyeThreader : MonoBehaviour
                     // We need to take this into account
                     AddDataToQueue(startTimeStamp_Left, EyeID.LEFT, BlinkType.SHORT_BLINK);
                     leftBlinkTracker = new List<float>();
+                    lslBlinkOutlet.push_sample(new string[] { "OPEN_LEFT_SHORT" });
                 }
                 else if (leftBlinkTracker.Count > m_SmallBlinkFrames && leftBlinkTracker.Count <= m_MediumBlinkFrames)
                 {
                     // We need to take this into account
                     AddDataToQueue(startTimeStamp_Left, EyeID.LEFT, BlinkType.MEDIUM_BLINK);
                     leftBlinkTracker = new List<float>();
+                    lslBlinkOutlet.push_sample(new string[] { "OPEN_LEFT_MEDIUM" });
                 }
                 else
                 {
                     // We need to take this into account
                     AddDataToQueue(startTimeStamp_Left, EyeID.LEFT, BlinkType.EXTENDED_BLINK);
                     leftBlinkTracker = new List<float>();
+                    lslBlinkOutlet.push_sample(new string[] { "OPEN_LEFT_EXTENDED" });
                 }
             }
 
@@ -239,6 +268,7 @@ public class EyeThreader : MonoBehaviour
             if (leftBlinkTracker.Count == 0)
             {
                 startTimeStamp_Left = frameCounter;
+                lslBlinkOutlet.push_sample(new string[] { "CLOSE_LEFT" });
             }
             // Add it to the list!
             leftBlinkTracker.Add(open_left);
@@ -268,6 +298,7 @@ public class EyeThreader : MonoBehaviour
                         // We need to take this into account
                         AddDataToQueue(startTimeStamp_Right, EyeID.RIGHT, BlinkType.EXTENDED_BLINK);
                         MAXCOUNTER_REACHED_RIGHT = false;
+                        lslBlinkOutlet.push_sample(new string[] { "OPEN_RIGHT_EXTENDED" });
                     }
                     // Ignore this and start over
                     rightBlinkTracker = new List<float>();
@@ -277,18 +308,21 @@ public class EyeThreader : MonoBehaviour
                     // We need to take this into account
                     AddDataToQueue(startTimeStamp_Right, EyeID.RIGHT, BlinkType.SHORT_BLINK);
                     rightBlinkTracker = new List<float>();
+                    lslBlinkOutlet.push_sample(new string[] { "OPEN_RIGHT_SHORT" });
                 }
                 else if (rightBlinkTracker.Count > m_SmallBlinkFrames && rightBlinkTracker.Count <= m_MediumBlinkFrames)
                 {
                     // We need to take this into account
                     AddDataToQueue(startTimeStamp_Right, EyeID.RIGHT, BlinkType.MEDIUM_BLINK);
                     rightBlinkTracker = new List<float>();
+                    lslBlinkOutlet.push_sample(new string[] { "OPEN_RIGHT_MEDIUM" });
                 }
                 else
                 {
                     // We need to take this into account
                     AddDataToQueue(startTimeStamp_Right, EyeID.RIGHT, BlinkType.EXTENDED_BLINK);
                     rightBlinkTracker = new List<float>();
+                    lslBlinkOutlet.push_sample(new string[] { "OPEN_RIGHT_EXTENDED" });
                 }
             }
         }
@@ -298,6 +332,7 @@ public class EyeThreader : MonoBehaviour
             if (rightBlinkTracker.Count == 0)
             {
                 startTimeStamp_Right = frameCounter;
+                lslBlinkOutlet.push_sample(new string[] { "CLOSE_RIGHT" });
             }
             // Add it to the list!
             rightBlinkTracker.Add(open_right);
@@ -404,4 +439,16 @@ public class EyeThreader : MonoBehaviour
         return new liblsl.StreamOutlet(lslStreamInfo);
     }
 
+    liblsl.StreamOutlet KickStartBlinkLSLStream()
+    {
+        lslStreamInfo_Blink = new liblsl.StreamInfo(
+            lslStreamName_Blink,
+            lslStreamType_Blink,
+            lslChannelCount_Blink,
+            nominal_srate_blink,
+            lslChannelFormat_Blink,
+            unique_source_id_blink);
+
+        return new liblsl.StreamOutlet(lslStreamInfo_Blink);
+    }
 }

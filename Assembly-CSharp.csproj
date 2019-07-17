@@ -82,6 +82,7 @@
     <Compile Include="Assets\LSL4Unity\Scripts\ScriptOrder.cs" />
     <Compile Include="Assets\LSLEyeTracker.cs" />
     <Compile Include="Assets\Scripts\BlinkTracker.cs" />
+    <Compile Include="Assets\Scripts\CallCalibration.cs" />
     <Compile Include="Assets\Scripts\DebugLineDrawing.cs" />
     <Compile Include="Assets\Scripts\EyeThreader.cs" />
     <Compile Include="Assets\Scripts\EyeTracker.cs" />
