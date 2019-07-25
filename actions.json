@@ -72,6 +72,15 @@
       "name": "/actions/mixedreality/in/ExternalCamera",
       "type": "pose",
       "requirement": "optional"
+    },
+    {
+      "name": "/actions/StandardControl/in/Walk",
+      "type": "vector2"
+    },
+    {
+      "name": "/actions/StandardControl/in/Turn",
+      "type": "vector2",
+      "requirement": "suggested"
     }
   ],
   "action_sets": [
@@ -90,6 +99,10 @@
     {
       "name": "/actions/mixedreality",
       "usage": "single"
+    },
+    {
+      "name": "/actions/StandardControl",
+      "usage": "leftright"
     }
   ],
   "default_bindings": [

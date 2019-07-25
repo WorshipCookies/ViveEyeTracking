@@ -670,6 +670,10 @@
       <Project>{B6E75302-62AF-7AD1-BF8C-C8973E369574}</Project>
       <Name>Assembly-CSharp</Name>
     </ProjectReference>
+    <ProjectReference Include="SteamVR_Actions.csproj">
+      <Project>{51DF02E0-AB1B-36EE-ED51-F460D0E0EFAC}</Project>
+      <Name>SteamVR_Actions</Name>
+    </ProjectReference>
     <ProjectReference Include="SteamVR_Input_Editor.csproj">
       <Project>{528509A1-D4F2-382A-BD17-7E10CF400DA6}</Project>
       <Name>SteamVR_Input_Editor</Name>

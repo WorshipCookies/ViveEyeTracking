@@ -62,6 +62,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\BITalinoConnector.cs" />
     <Compile Include="Assets\LSL4Unity\Demos\CubeRotation.cs" />
     <Compile Include="Assets\LSL4Unity\Demos\LSLTransformDemoOutlet.cs" />
     <Compile Include="Assets\LSL4Unity\Demos\RandomMarker.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="Assets\Scripts\EyeThreader.cs" />
     <Compile Include="Assets\Scripts\EyeTracker.cs" />
     <Compile Include="Assets\Scripts\LSLInterface.cs" />
+    <Compile Include="Assets\Scripts\PlayerMove.cs" />
     <Compile Include="Assets\Scripts\ThreadReader.cs" />
     <Compile Include="Assets\ViveSR\Scripts\Sample\DartBoard.cs" />
     <Compile Include="Assets\ViveSR\Scripts\Sample\SRanipal_AvatarEyeSample.cs" />
@@ -102,6 +104,7 @@
     <Compile Include="Assets\ViveSR\Scripts\SRanipal_EyeShapeTableDrawer.cs" />
     <Compile Include="Assets\ViveSR\Scripts\SRWorks_Enums.cs" />
     <None Include="Assets\ViveSR\Shaders\DartBoardShader.shader" />
+    <None Include="Assets\Materials\NonUIOcclusion.shader" />
     <None Include="Assets\ViveSR\Shaders\Unlit-Alpha2Gray.shader" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>D:/Unity Projects/Vive Eye Tracking/ViveEyeTracking/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
@@ -666,6 +669,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="SteamVR_Actions.csproj">
+      <Project>{51DF02E0-AB1B-36EE-ED51-F460D0E0EFAC}</Project>
+      <Name>SteamVR_Actions</Name>
+    </ProjectReference>
     <ProjectReference Include="SteamVR_Input_Editor.csproj">
       <Project>{528509A1-D4F2-382A-BD17-7E10CF400DA6}</Project>
       <Name>SteamVR_Input_Editor</Name>

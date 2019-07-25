@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &6056262471729835050
+--- !u!1 &3405200454725394000
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,23 +8,23 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6056262471729835055}
-  - component: {fileID: 6056262471729835052}
-  - component: {fileID: 6056262471729835053}
+  - component: {fileID: 3405200454725394005}
+  - component: {fileID: 3405200454725394006}
+  - component: {fileID: 3405200454725394007}
   m_Layer: 0
-  m_Name: EyeTrackingObject
+  m_Name: EyeTrackingObject 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6056262471729835055
+--- !u!4 &3405200454725394005
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6056262471729835050}
+  m_GameObject: {fileID: 3405200454725394000}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -32,26 +32,29 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6056262471729835052
+--- !u!114 &3405200454725394006
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6056262471729835050}
+  m_GameObject: {fileID: 3405200454725394000}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9f9230b225efa094fa2198528fe63599, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ShowValues: {fileID: 0}
---- !u!114 &6056262471729835053
+  ShowBlinkValues: {fileID: 0}
+  ShowEyeTrackingInfo: {fileID: 0}
+  gazeImage: {fileID: 0}
+  TARGET_FRAMERATE: 60
+--- !u!114 &3405200454725394007
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6056262471729835050}
+  m_GameObject: {fileID: 3405200454725394000}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0cea73527f974124695f3f1638790954, type: 3}
@@ -61,3 +64,7 @@ MonoBehaviour:
   m_SmallBlinkFrames: 36
   m_MediumBlinkFrames: 84
   frameCounter: 0
+  lslStreamName: Unity_EyeGazeAndPupil_120Hz
+  lslStreamType: Eye_Gaze_Data
+  lslStreamName_Blink: Unity_EyeOpenessMarker
+  lslStreamType_Blink: Eye_Openess_Markers

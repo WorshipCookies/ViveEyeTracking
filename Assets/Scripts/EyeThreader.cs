@@ -19,7 +19,7 @@ public class EyeThreader : MonoBehaviour
     private const int FrequencyControl = 1;
     private const int MaxFrameCount = 3600;
 
-
+    public bool m_SendValuesToMainThread = true;
     public ConcurrentQueue<BlinkData> blink_data = new ConcurrentQueue<BlinkData>();
     public ConcurrentQueue<EyeInfoData> gaze_data = new ConcurrentQueue<EyeInfoData>();
 
@@ -42,7 +42,7 @@ public class EyeThreader : MonoBehaviour
 
     private liblsl.StreamInfo lslStreamInfo;
     private liblsl.StreamOutlet lslOutlet;
-    private const int lslChannelCount = 7;
+    private const int lslChannelCount = 9;
 
     private double nominal_srate = 120;
     private const liblsl.channel_format_t lslChannelFormat = liblsl.channel_format_t.cf_float32;
@@ -170,10 +170,17 @@ public class EyeThreader : MonoBehaviour
 
                     // Pupil Data Handling with LabStreaming Layer
                     float[] pupilDirection = PupilData(data);
+
+                    // Pupil Direction Info
                     gazeSampler[sampleCounter, 3] = pupilDirection[0];
                     gazeSampler[sampleCounter, 4] = pupilDirection[1];
                     gazeSampler[sampleCounter, 5] = pupilDirection[2];
                     gazeSampler[sampleCounter, 6] = pupilDirection[3];
+
+                    // Pupil Diameter Info
+                    gazeSampler[sampleCounter, 7] = pupilDirection[4];
+                    gazeSampler[sampleCounter, 8] = pupilDirection[5];
+
 
                     sampleCounter++;
                     if (sampleCounter >= 100)
@@ -390,24 +397,29 @@ public class EyeThreader : MonoBehaviour
 
         float XLeft = 0.0f;
         float YLeft = 0.0f;
+        float PupilDiamLeft = 0.0f;
         if (valid_left)
         {
             // To Make Sense in the Unity Coordinate System.
             XLeft = eyeData.verbose_data.left.pupil_position_in_sensor_area.x * 2 - 1;
             YLeft = eyeData.verbose_data.left.pupil_position_in_sensor_area.y * -2 + 1;
+            PupilDiamLeft = eyeData.verbose_data.left.pupil_diameter_mm;
         }
 
         bool valid_right = eyeData.verbose_data.right.GetValidity(SingleEyeDataValidity.SINGLE_EYE_DATA_PUPIL_POSITION_IN_SENSOR_AREA_VALIDITY);
         float XRight = 0.0f;
         float YRight = 0.0f;
+        float PupilDiamRight = 0.0f;
+
         if (valid_right)
         {
             // To Make Sense in the Unity Coordinate System.
             XRight = eyeData.verbose_data.right.pupil_position_in_sensor_area.x * 2 - 1;
             YRight = eyeData.verbose_data.right.pupil_position_in_sensor_area.y * -2 + 1;
+            PupilDiamRight = eyeData.verbose_data.right.pupil_diameter_mm;
         }
 
-        return new float[] { XLeft, YLeft, XRight, YRight };
+        return new float[] { XLeft, YLeft, XRight, YRight, PupilDiamLeft, PupilDiamRight };
 
     }
 

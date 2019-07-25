@@ -13,7 +13,6 @@ public class ThreadReader : MonoBehaviour
     private EyeThreader DataThread = null;
 
     public Text ShowBlinkValues;
-    public Text ShowEyeTrackingInfo;
     public Image gazeImage;
 
     public int TARGET_FRAMERATE = 60;
@@ -122,7 +121,7 @@ public class ThreadReader : MonoBehaviour
 
         gazeDirection = Quaternion.Euler(Camera.main.transform.rotation.eulerAngles) * gazeDirection;
 
-        Ray aux = new Ray(gz.gaze_ray.origin, gazeDirection);
+        Ray aux = new Ray(Camera.main.transform.position, gazeDirection);
         float dist = Vector3.Distance(aux.origin, gazeImage.canvas.transform.position);
 
         // This is the point on the actual screen.
