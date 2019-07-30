@@ -32,5 +32,13 @@ namespace Valve.VR
                 return SteamVR_Actions.standardControl_Turn;
             }
         }
+        
+        public virtual SteamVR_Action_Vector2 RotateTeleport
+        {
+            get
+            {
+                return SteamVR_Actions.standardControl_RotateTeleport;
+            }
+        }
     }
 }

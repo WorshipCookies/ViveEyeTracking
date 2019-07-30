@@ -13,10 +13,9 @@ Material:
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 3000
+  m_CustomRenderQueue: -1
   stringTagMap:
     OriginalShader: Standard
-    RenderType: Transparent
   disabledShaderPasses: []
   m_SavedProperties:
     serializedVersion: 3
@@ -50,7 +49,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 8400000, guid: 005ed5a6df2f5ff468efd6497d37fefa, type: 2}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -121,7 +120,7 @@ Material:
     - _EmissionColorUI: {r: 1, g: 1, b: 1, a: 1}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
     - _Specular: {r: 0, g: 0, b: 0, a: 0}
-    - _TintColor: {r: 0.22033198, g: 0.41133347, b: 0.516, a: 0.453}
+    - _TintColor: {r: 0.22033194, g: 0.4113334, b: 0.516, a: 0}
     - g_vWorldAlignedNormalTangentU: {r: -1, g: 0, b: 0, a: 0}
     - g_vWorldAlignedNormalTangentV: {r: 0, g: 0, b: 1, a: 0}
     - g_vWorldAlignedTextureNormal: {r: 0, g: 1, b: 0, a: 0}

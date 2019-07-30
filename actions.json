@@ -81,6 +81,10 @@
       "name": "/actions/StandardControl/in/Turn",
       "type": "vector2",
       "requirement": "suggested"
+    },
+    {
+      "name": "/actions/StandardControl/in/RotateTeleport",
+      "type": "vector2"
     }
   ],
   "action_sets": [

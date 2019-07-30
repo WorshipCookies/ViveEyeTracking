@@ -10,12 +10,10 @@ public class PlayerMove : MonoBehaviour
     public SteamVR_Action_Vector2 m_MovePostion;
     public SteamVR_Action_Vector2 m_RotatePosition;
 
-    public CharacterController m_CharacterController;
 
-
-    public float m_MaxSpeed = 8f;
-    public float m_Acceleration = 1f;
-    public float m_Deceleration = 4f;
+    public float m_MaxSpeed = 0.1f;
+    public float m_Acceleration = 0.05f;
+    public float m_Deceleration = 0.07f;
     private float currentSpeed = 0f;
     private Vector2 lastDirection;
 
@@ -23,21 +21,30 @@ public class PlayerMove : MonoBehaviour
     public float m_MaxTurnSpeed = 2f;
     private float currentRotation;
 
+    private CharacterController characterController;
+
+    public bool disableControllers = false;
 
     private void Awake()
     {
+        Application.targetFrameRate = 60;
         //m_MovePostion = SteamVR_Actions.StandardControl.Walk;
-
+        if (!disableControllers)
+        {
+            m_ActionSet.Activate(SteamVR_Input_Sources.Any, 1, false);
+            lastDirection = Vector3.zero;
+            currentRotation = 0f;
+        }
+        else
+        {
+            m_ActionSet.Deactivate(SteamVR_Input_Sources.Any);
+        }
     }
 
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        m_ActionSet.Activate(SteamVR_Input_Sources.Any, 1, false);
-        lastDirection = Vector3.zero;
-        currentRotation = 0f;
+        characterController = this.GetComponent<CharacterController>();
     }
-
 
     // Update is called once per frame
     void Update()
@@ -53,8 +60,6 @@ public class PlayerMove : MonoBehaviour
         RotationMovement(rotVal);
         //Debug.Log("Right Hand " + rotVal);
 
-
-        
     }
 
 
@@ -90,7 +95,9 @@ public class PlayerMove : MonoBehaviour
         }
 
         targetDirection.y = 0f;
-        m_CharacterController.SimpleMove(targetDirection);
+        characterController.Move(targetDirection);
+
+        //this.transform.position += targetDirection;
     }
 
     void RotationMovement(Vector2 rotVal)

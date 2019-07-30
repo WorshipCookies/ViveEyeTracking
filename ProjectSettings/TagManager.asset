@@ -7,6 +7,11 @@ TagManager:
   - projectile
   - FxTemporaire
   - Level
+  - Floor
+  - Coin
+  - Manager
+  - MarkerObject
+  - CoinListObject
   layers:
   - Default
   - TransparentFX

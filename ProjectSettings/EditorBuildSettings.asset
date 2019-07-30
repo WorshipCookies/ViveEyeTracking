@@ -9,6 +9,12 @@ EditorBuildSettings:
     path: Assets/Scenes/EyeCalibration.unity
     guid: a612c9594a5e30748af321335e202275
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
-    guid: 9fc0d4010bbf28b4594072e72b8655ab
+    path: Assets/Scenes/BaseLine.unity
+    guid: 79b823c919e6b774290cf6b3a76951dc
+  - enabled: 1
+    path: Assets/Scenes/GameFullControl.unity
+    guid: d045ae8e8c4d49d4abd54ee81e7c69f2
+  - enabled: 1
+    path: Assets/Scenes/EndScene.unity
+    guid: 0f2279a6544b3ce428ff6c331773eec8
   m_configObjects: {}
