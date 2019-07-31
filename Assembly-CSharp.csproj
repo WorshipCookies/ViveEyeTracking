@@ -63,24 +63,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\BITalinoConnector.cs" />
-    <Compile Include="Assets\LSL4Unity\Demos\CubeRotation.cs" />
-    <Compile Include="Assets\LSL4Unity\Demos\LSLTransformDemoOutlet.cs" />
-    <Compile Include="Assets\LSL4Unity\Demos\RandomMarker.cs" />
-    <Compile Include="Assets\LSL4Unity\Demos\StreamInfo.cs" />
-    <Compile Include="Assets\LSL4Unity\LSL.cs" />
-    <Compile Include="Assets\LSL4Unity\Scripts\AInlet.cs" />
-    <Compile Include="Assets\LSL4Unity\Scripts\BaseInlet.cs" />
-    <Compile Include="Assets\LSL4Unity\Scripts\Examples\DemoInletForFloatSamples.cs" />
-    <Compile Include="Assets\LSL4Unity\Scripts\Examples\ExampleFloatInlet.cs" />
-    <Compile Include="Assets\LSL4Unity\Scripts\Examples\ScaleMapping.cs" />
-    <Compile Include="Assets\LSL4Unity\Scripts\Examples\TransformMapping.cs" />
-    <Compile Include="Assets\LSL4Unity\Scripts\LSLCommon.cs" />
-    <Compile Include="Assets\LSL4Unity\Scripts\LSLMarkerStream.cs" />
-    <Compile Include="Assets\LSL4Unity\Scripts\LSLOutlet.cs" />
-    <Compile Include="Assets\LSL4Unity\Scripts\LSLTimeSync.cs" />
-    <Compile Include="Assets\LSL4Unity\Scripts\LSLTransformOutlet.cs" />
-    <Compile Include="Assets\LSL4Unity\Scripts\Resolver.cs" />
-    <Compile Include="Assets\LSL4Unity\Scripts\ScriptOrder.cs" />
     <Compile Include="Assets\LSLEyeTracker.cs" />
     <Compile Include="Assets\Scripts\BaseLineScript.cs" />
     <Compile Include="Assets\Scripts\BlinkTracker.cs" />
@@ -90,6 +72,7 @@
     <Compile Include="Assets\Scripts\EyeThreader.cs" />
     <Compile Include="Assets\Scripts\EyeTracker.cs" />
     <Compile Include="Assets\Scripts\GameTimerManager.cs" />
+    <Compile Include="Assets\Scripts\LSL.cs" />
     <Compile Include="Assets\Scripts\LSLInterface.cs" />
     <Compile Include="Assets\Scripts\LSLMarkerScript.cs" />
     <Compile Include="Assets\Scripts\LSLPlayerLogger.cs" />
