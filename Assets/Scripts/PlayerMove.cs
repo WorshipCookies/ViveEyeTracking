@@ -29,16 +29,11 @@ public class PlayerMove : MonoBehaviour
     {
         Application.targetFrameRate = 60;
         //m_MovePostion = SteamVR_Actions.StandardControl.Walk;
-        if (!disableControllers)
-        {
-            m_ActionSet.Activate(SteamVR_Input_Sources.Any, 1, false);
-            lastDirection = Vector3.zero;
-            currentRotation = 0f;
-        }
-        else
-        {
-            m_ActionSet.Deactivate(SteamVR_Input_Sources.Any);
-        }
+       
+        m_ActionSet.Activate(SteamVR_Input_Sources.Any, 1, false);
+        lastDirection = Vector3.zero;
+        currentRotation = 0f;
+        
     }
 
     private void Start()
@@ -49,17 +44,17 @@ public class PlayerMove : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Translation Movement
-        Vector2 moveVal = m_MovePostion.GetAxis(SteamVR_Input_Sources.LeftHand);
-        TranslationMovement(moveVal);
-        Debug.Log(m_ActionSet.IsActive());
 
+        if (!disableControllers)
+        {
+            // Translation Movement
+            Vector2 moveVal = m_MovePostion.GetAxis(SteamVR_Input_Sources.LeftHand);
+            TranslationMovement(moveVal);
 
-
-        Vector2 rotVal = m_RotatePosition.GetAxis(SteamVR_Input_Sources.RightHand);
-        RotationMovement(rotVal);
-        //Debug.Log("Right Hand " + rotVal);
-
+            Vector2 rotVal = m_RotatePosition.GetAxis(SteamVR_Input_Sources.RightHand);
+            RotationMovement(rotVal);
+            //Debug.Log("Right Hand " + rotVal);
+        }
     }
 
 

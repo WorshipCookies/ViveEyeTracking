@@ -22334,7 +22334,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: edd5e10cc20ddc940a374309130931dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_MaxLevelTimer: 25
+  m_MaxLevelTimer: 60
   ForceQuit: 0
 --- !u!4 &1174881465
 Transform:
